@@ -129,6 +129,7 @@ export default {
       });
       // group = group.map(rule);
     },
+    // fill the last value if the group is missing only one element
     rule1: function(arr) {
       var arrVal = this.convert(arr);
       var fills = [];
@@ -145,6 +146,8 @@ export default {
       // }
       return fills;
     },
+    // scan three hoziontal lines at a time, since each horizontal line should have a number exactly
+    // once, cross vertical lines to see if there is some definite element that can be filled
     rule2: function() {
       const vm = this;
       var fills = [];
@@ -181,6 +184,8 @@ export default {
       }
       return fills;
     },
+    // scan three vertical lines at a time, since each vertical line should have a number exactly
+    // once, cross horizontal lines to see if there is some definite element that can be filled
     rule3: function() {
       const vm = this;
       var fills = [];
@@ -215,6 +220,8 @@ export default {
       }
       return fills;
     },
+    // scan each cell, list all number occurrence for its corresponding heng, shu and jiu groups, if
+    // there is only one number left, fill that number
     rule4: function() {
       const vm = this;
       var fills = [];

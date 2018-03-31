@@ -4,7 +4,7 @@
       <table class="sudoku" border="1" cellspacing="0">
         <tr v-for="x in 9">
           <td v-for="y in 9">
-            <input type="number" min="1" max= "9" v-model.number="cells[x-1][y-1]"/>
+            <input type="number" min="1" max= "9" v-model.number="cells[x-1][y-1].value"/>
           </td>
         </tr>
       </table>
@@ -28,10 +28,25 @@
     }
   }
 
+  class Sudoku {
+    private blocks: Object = {};
+
+    set(x: number, y: number, value: number) {
+      if (!this.blocks[x]) {
+        this.blocks[x] = {}
+      }
+      this.blocks[x][y] = new Block(x, y, value);
+    }
+
+    get(x: number, y: number) {
+      return this.blocks[x][y];
+    }
+  }
+
   @Component({})
   export default class App extends Vue {
     // initilize data
-    cells = [
+    rawCells: Array<Array<any>> = [
       ["","","","","","","",4,""],
       ["",8,7,4,"","","","",5],
       ["",2,4,6,"","","",1,3],
@@ -42,9 +57,11 @@
       ["","","","",4,2,"","",6],
       ["","","","","",6,"",8,7]
     ];
-    heng: Array<Array<Array<number>>> = [];
-    shu: Array<Array<Array<number>>>  = [];
-    jiu: Array<Array<Array<number>>>  = [];
+    cells: Object = this.convert2DArrayToObject(this.rawCells);
+
+    heng: Array<Array<Block>>  = [];
+    shu: Array<Array<Block>>  = [];
+    jiu: Array<Array<Block>>  = [];
     // cell: [
     //   ["","","","","","","","4",""],
     //   ["","8","7","4","","","","","5"],
@@ -58,6 +75,17 @@
     // ]
     
     // methods
+    convert2DArrayToObject (arr2: Array<Array<any>>) : Object {
+      let object: Object = {};
+      arr2.forEach((arr: Array<any>, x: number) => {
+        object[x] = {};
+        arr.forEach((v: any, y: number) => {
+          object[x][y] = new Block(x, y, v);
+        })
+      })
+      return object;
+    }
+
     compute () {
       const vm = this;
       var group = function () {
@@ -66,9 +94,9 @@
           vm.shu[i] = [];
           vm.jiu[i] = [];
           for (let j = 0; j < 9; j++) {
-            vm.heng[i][j] = [i, j];
-            vm.shu[i][j] = [j, i]
-            vm.jiu[i][j] = [3 * Math.floor(i/3) + Math.floor(j/3), 3 * (i%3) + j%3]
+            vm.heng[i][j] = vm.cells[i][j];
+            vm.shu[i][j] = vm.cells[j][i];
+            vm.jiu[i][j] = vm.cells[3 * Math.floor(i/3) + Math.floor(j/3)][3 * (i%3) + j%3];
           }
           // for (let j = 0; j < 9; j++) {
           //   vm.heng[i][j] = vm.cells[i][j] == "" ? 0 : vm.cells[i][j];
@@ -79,13 +107,14 @@
         }
       };
 
-      group()
+      group();
     }
 
     runRule1 () {
-      const vm = this
-      var groups = [vm.heng, vm.shu, vm.jiu]
-      groups.forEach(g => vm.runRuleForGroup(vm.rule1, g))
+      const vm = this;
+      var groups = [vm.heng, vm.shu, vm.jiu];
+      // groups.forEach(g => vm.runRuleForGroup(vm.rule1, g))
+      groups.forEach(g => g.map(vm.rule1));
     }
 
     runRule2 () {
@@ -126,8 +155,8 @@
     }
 
     runRuleForGroup  (rule, group) {
-      const vm = this
-      var fills = group.map(rule).reduceArray()
+      const vm = this;
+      let fills = group.map(rule).reduceArray();
       // fills example:
       // [[[0,0], 5],
       //  [[2,1], 3],
@@ -144,20 +173,21 @@
 
     // fill the last value if the group is missing only one element
     rule1 (arr) {
-      var arrVal = this.convert(arr)
+      var arrVal = arr.map(b => b.value == "" ? 0 : b.value);
       var fills: Array<any> = []
       if (arrVal.countOf(0) == 1) {
-        let sum = 0
-        arrVal.forEach(e => sum = sum + e)
-        let idx = arrVal.indexOf(0)
-        fills.push([arr[idx], 45 - sum])
+        let sum = 0;
+        arrVal.forEach(e => sum = sum + e);
+        let idx = arrVal.indexOf(0);
+        arr[idx].value = 45 - sum;
+        // fills.push([arr[idx], 45 - sum]);
       }
       // if (arr.countOf(0) == 1) {
       //   let sum = 0
       //   arr.forEach(e => sum = sum + e)
       //   arr[arr.indexOf(0)] = 45 - sum
       // }
-      return fills
+      // return fills;
     }
 
     // scan three hoziontal lines at a time, since each horizontal line should have a number exactly
@@ -264,7 +294,7 @@
     mounted () {
       Object.defineProperties(Array.prototype, {
         countOf: {
-          value: function(value) {
+          value: function(value: number) {
             return this.reduce(function(total,x){return x == value ? total + 1 : total}, 0)
           }
         },

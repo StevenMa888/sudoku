@@ -19,7 +19,7 @@
   import Vue from 'vue'
   import Component from 'vue-class-component'
 
-  class Block {
+  class Cell {
     constructor(public x: number, public y: number, public value: number = 0, public possibleValues: Array<number> = []) {
       this.x = x;
       this.y = y;
@@ -29,17 +29,21 @@
   }
 
   class Sudoku {
-    private blocks: Object = {};
+    cells: Object = {};
 
-    set(x: number, y: number, value: number) {
-      if (!this.blocks[x]) {
-        this.blocks[x] = {}
-      }
-      this.blocks[x][y] = new Block(x, y, value);
+    constructor(rawCells: Array<Array<any>>) {
+      this.cells = this.convert2DArrayToObject(rawCells);
     }
 
-    get(x: number, y: number) {
-      return this.blocks[x][y];
+    convert2DArrayToObject (arr2: Array<Array<any>>) : Object {
+      let object: Object = {};
+      arr2.forEach((arr: Array<any>, x: number) => {
+        object[x] = {};
+        arr.forEach((v: any, y: number) => {
+          object[x][y] = new Cell(x, y, v);
+        })
+      })
+      return object;
     }
   }
 
@@ -57,11 +61,12 @@
       ["","","","",4,2,"","",6],
       ["","","","","",6,"",8,7]
     ];
-    cells: Object = this.convert2DArrayToObject(this.rawCells);
+    sudoku: Sudoku = new Sudoku(this.rawCells);
+    cells: Object = this.sudoku.cells;
 
-    heng: Array<Array<Block>>  = [];
-    shu: Array<Array<Block>>  = [];
-    jiu: Array<Array<Block>>  = [];
+    heng: Array<Array<Cell>>  = [];
+    shu: Array<Array<Cell>>  = [];
+    jiu: Array<Array<Cell>>  = [];
     // cell: [
     //   ["","","","","","","","4",""],
     //   ["","8","7","4","","","","","5"],
@@ -75,17 +80,6 @@
     // ]
     
     // methods
-    convert2DArrayToObject (arr2: Array<Array<any>>) : Object {
-      let object: Object = {};
-      arr2.forEach((arr: Array<any>, x: number) => {
-        object[x] = {};
-        arr.forEach((v: any, y: number) => {
-          object[x][y] = new Block(x, y, v);
-        })
-      })
-      return object;
-    }
-
     compute () {
       const vm = this;
       var group = function () {

@@ -71,7 +71,7 @@
     // methods
     compute () {
       const vm = this;
-      var group = function () {
+      let group = function () {
         for (let i = 0; i < 9; i++) {
           vm.heng[i] = [];
           vm.shu[i] = [];
@@ -89,7 +89,7 @@
 
     runRule1 () {
       const vm = this;
-      var groups = [vm.heng, vm.shu, vm.jiu];
+      let groups = [vm.heng, vm.shu, vm.jiu];
       groups.forEach(g => g.map(vm.rule1));
     }
 
@@ -129,24 +129,24 @@
         let heng3 = vm.heng[i].concat(vm.heng[i+1]).concat(vm.heng[i+2]);
         let heng3Val: Array<number> = vm.convert(heng3);
         // count occurrence for each number
-        let nums = {1: [], 2: [], 3:[], 4:[], 5:[], 6:[], 7:[], 8:[], 9:[]}
+        let nums = {1: [], 2: [], 3:[], 4:[], 5:[], 6:[], 7:[], 8:[], 9:[]};
         for (let j = 0; j < 27; j ++ ) {
           if (heng3Val[j] != 0) {
-            nums[heng3Val[j]].push({c: heng3[j], v: heng3Val[j]})
+            nums[heng3Val[j]].push({c: heng3[j], v: heng3Val[j]});
           }
         }
         for (let k = 1; k <= 9; k++) {
           if (nums[k].length == 2) { // only 1 heng line is missing k
-            let heng1 = nums[k][0].c.x
-            let heng2 = nums[k][1].c.x
-            let jiu1 = 3 * Math.floor(heng1 / 3) + Math.floor(nums[k][0].c.y / 3)
-            let jiu2 = 3 * Math.floor(heng2 / 3) + Math.floor(nums[k][1].c.y / 3)
-            let jiu3 = (i != jiu1 && i != jiu2) ? i : ((i + 1) != jiu1 && (i + 1) != jiu2)? (i + 1) : (i + 2) // the target jiu group should be among the three adjacent jiu groups
-            let targetHeng = (i != heng1 && i != heng2) ? i : ((i + 1) != heng1 && (i + 1) != heng2)? (i + 1) : (i + 2) // the target cell should be among the three adjacent heng lines
+            let heng1 = nums[k][0].c.x;
+            let heng2 = nums[k][1].c.x;
+            let jiu1 = 3 * Math.floor(heng1 / 3) + Math.floor(nums[k][0].c.y / 3);
+            let jiu2 = 3 * Math.floor(heng2 / 3) + Math.floor(nums[k][1].c.y / 3);
+            let jiu3 = (i != jiu1 && i != jiu2) ? i : ((i + 1) != jiu1 && (i + 1) != jiu2)? (i + 1) : (i + 2); // the target jiu group should be among the three adjacent jiu groups
+            let targetHeng = (i != heng1 && i != heng2) ? i : ((i + 1) != heng1 && (i + 1) != heng2)? (i + 1) : (i + 2); // the target cell should be among the three adjacent heng lines
             let startShu = (jiu3 - 3 * Math.floor(targetHeng / 3)) * 3 // narrow down the target cell shu lines
-            let countShu1 = vm.convert(vm.shu[startShu]).countOf(k) | Number((vm.cells[targetHeng][startShu].value != "")) // if this line contains k or the cell is occupied, then it is counted as 1
-            let countShu2 = vm.convert(vm.shu[startShu + 1]).countOf(k) | Number((vm.cells[targetHeng][startShu + 1].value != ""))
-            let countShu3 = vm.convert(vm.shu[startShu + 2]).countOf(k) | Number((vm.cells[targetHeng][startShu + 2].value != ""))
+            let countShu1 = vm.convert(vm.shu[startShu]).countOf(k) | Number((vm.cells[targetHeng][startShu].value != "")); // if this line contains k or the cell is occupied, then it is counted as 1
+            let countShu2 = vm.convert(vm.shu[startShu + 1]).countOf(k) | Number((vm.cells[targetHeng][startShu + 1].value != ""));
+            let countShu3 = vm.convert(vm.shu[startShu + 2]).countOf(k) | Number((vm.cells[targetHeng][startShu + 2].value != ""));
             // if both of the other two lines contains k or the position is occupied, then the left target cell can only be k
             if (countShu1 + countShu2 + countShu3 == 2) {
               let targetShu = countShu1 == 0 ? startShu : countShu2 == 0 ? startShu + 1 : startShu + 2;
@@ -162,29 +162,29 @@
     rule3 () {
       const vm = this;
       for (let i = 0; i < 9; i += 3) {
-        var shu3 = vm.shu[i].concat(vm.shu[i+1]).concat(vm.shu[i+2])
-        var shu3Val: Array<number> = vm.convert(shu3);
-        var nums = {1: [], 2: [], 3:[], 4:[], 5:[], 6:[], 7:[], 8:[], 9:[]}
+        let shu3 = vm.shu[i].concat(vm.shu[i+1]).concat(vm.shu[i+2]);
+        let shu3Val: Array<number> = vm.convert(shu3);
+        let nums = {1: [], 2: [], 3:[], 4:[], 5:[], 6:[], 7:[], 8:[], 9:[]};
         for (let j = 0; j < 27; j ++ ) {
           if (shu3Val[j] != 0) {
-            nums[shu3Val[j]].push({c: shu3[j], v: shu3Val[j]})
+            nums[shu3Val[j]].push({c: shu3[j], v: shu3Val[j]});
           }
         }
         for (let k = 1; k <= 9; k++) {
           if (nums[k].length == 2) {
-            let shu1 = nums[k][0].c.y
-            let shu2 = nums[k][1].c.y
-            let jiu1 = 3 * Math.floor(nums[k][0].c.x / 3) + Math.floor(shu1 / 3)
-            let jiu2 = 3 * Math.floor(nums[k][1].c.x / 3) + Math.floor(shu2 / 3)
-            var jiu3 = (3 - Math.floor(jiu1 / 3) - Math.floor(jiu2 / 3)) * 3 + i / 3 // 0, 3, 6 or 1, 4, 7 or 2, 5, 8
-            var targetShu = (i != shu1 && i != shu2) ? i : ((i + 1) != shu1 && (i + 1) != shu2)? (i + 1) : (i + 2)
-            let startHeng = jiu3 - Math.floor(targetShu / 3)
-            let countHeng1 = vm.convert(vm.heng[startHeng]).countOf(k) | Number((vm.cells[startHeng][targetShu].value != "")) // if this line contains k or the cell is occupied, then it is counted as 1
-            let countHeng2 = vm.convert(vm.heng[startHeng + 1]).countOf(k) | Number((vm.cells[startHeng + 1][targetShu].value != ""))
-            let countHeng3 = vm.convert(vm.heng[startHeng + 2]).countOf(k) | Number((vm.cells[startHeng + 2][targetShu].value != ""))
+            let shu1 = nums[k][0].c.y;
+            let shu2 = nums[k][1].c.y;
+            let jiu1 = 3 * Math.floor(nums[k][0].c.x / 3) + Math.floor(shu1 / 3);
+            let jiu2 = 3 * Math.floor(nums[k][1].c.x / 3) + Math.floor(shu2 / 3);
+            let jiu3 = (3 - Math.floor(jiu1 / 3) - Math.floor(jiu2 / 3)) * 3 + i / 3; // 0, 3, 6 or 1, 4, 7 or 2, 5, 8
+            let targetShu = (i != shu1 && i != shu2) ? i : ((i + 1) != shu1 && (i + 1) != shu2)? (i + 1) : (i + 2);
+            let startHeng = jiu3 - Math.floor(targetShu / 3);
+            let countHeng1 = vm.convert(vm.heng[startHeng]).countOf(k) | Number((vm.cells[startHeng][targetShu].value != "")); // if this line contains k or the cell is occupied, then it is counted as 1
+            let countHeng2 = vm.convert(vm.heng[startHeng + 1]).countOf(k) | Number((vm.cells[startHeng + 1][targetShu].value != ""));
+            let countHeng3 = vm.convert(vm.heng[startHeng + 2]).countOf(k) | Number((vm.cells[startHeng + 2][targetShu].value != ""));
             // if both of the other two lines contains k or the position is occupied, then the left target cell can only be k
             if (countHeng1 + countHeng2 + countHeng3 == 2) {
-              var targetHeng = countHeng1 == 0 ? startHeng : countHeng2 == 0 ? startHeng + 1 : startHeng + 2;
+              let targetHeng = countHeng1 == 0 ? startHeng : countHeng2 == 0 ? startHeng + 1 : startHeng + 2;
               vm.cells[targetHeng][targetShu].value = k;
             }
           }
@@ -199,13 +199,13 @@
       for (let i = 0; i < 9; i ++) {
         for (let j = 0; j < 9; j ++) {
           if (vm.cells[i][j].value == "") {
-            let g1 = i // heng group that the current cell belongs to
-            let g2 = j // shu group...
-            let g3 = 3 * Math.floor(g1 / 3) + Math.floor(g2 / 3) // jiu group...
-            let nums: Array<number> = vm.convert(vm.heng[g1]).concat(vm.convert(vm.shu[g2])).concat(vm.convert(vm.jiu[g3]))
-            let nonFillable = {}
-            nums.forEach(n => nonFillable[n] = 1)
-            let fillable = [1,2,3,4,5,6,7,8,9].filter(n => !nonFillable[n])
+            let g1 = i; // heng group that the current cell belongs to
+            let g2 = j; // shu group...
+            let g3 = 3 * Math.floor(g1 / 3) + Math.floor(g2 / 3); // jiu group...
+            let nums: Array<number> = vm.convert(vm.heng[g1]).concat(vm.convert(vm.shu[g2])).concat(vm.convert(vm.jiu[g3]));
+            let nonFillable = {};
+            nums.forEach(n => nonFillable[n] = 1);
+            let fillable = [1,2,3,4,5,6,7,8,9].filter(n => !nonFillable[n]);
             if (fillable.length == 1) {
               vm.cells[i][j].value = fillable[0];
             }

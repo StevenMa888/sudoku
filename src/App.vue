@@ -67,17 +67,6 @@
     heng: Array<Array<Cell>>  = [];
     shu: Array<Array<Cell>>  = [];
     jiu: Array<Array<Cell>>  = [];
-    // cell: [
-    //   ["","","","","","","","4",""],
-    //   ["","8","7","4","","","","","5"],
-    //   ["","2","4","6","","","","1","3"],
-    //   ["6","","3","","","1","5","",""],
-    //   ["9","","8","","6","4","3","",""],
-    //   ["","","","","5","","","",""],
-    //   ["","","9","","3","8","","5","4"],
-    //   ["","","","","4","2","","","6"],
-    //   ["","","","","","6","","8","7"]
-    // ]
     
     // methods
     compute () {
@@ -92,12 +81,6 @@
             vm.shu[i][j] = vm.cells[j][i];
             vm.jiu[i][j] = vm.cells[3 * Math.floor(i/3) + Math.floor(j/3)][3 * (i%3) + j%3];
           }
-          // for (let j = 0; j < 9; j++) {
-          //   vm.heng[i][j] = vm.cells[i][j] == "" ? 0 : vm.cells[i][j];
-          //   vm.shu[i][j] = vm.cells[j][i] == "" ? 0 : vm.cells[j][i];
-          //   let jiuValue = vm.cells[3 * Math.floor(i/3) + Math.floor(j/3)][3 * (i%3) + j%3];
-          //   vm.jiu[i][j] = jiuValue == "" ? 0 : jiuValue;
-          // }
         }
       };
 
@@ -107,92 +90,40 @@
     runRule1 () {
       const vm = this;
       var groups = [vm.heng, vm.shu, vm.jiu];
-      // groups.forEach(g => vm.runRuleForGroup(vm.rule1, g))
       groups.forEach(g => g.map(vm.rule1));
     }
 
     runRule2 () {
-      // const vm = this;
-      // var cellWhole = vm.cells.reduceArray()
-      // var numCount = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-      // numCount = numCount.map(n => cellWhole.countOf(n))
-      // var fills = vm.rule2();
-      // fills.forEach(f => {
-      //   vm.cells[f[0][0]].splice(f[0][1], 1, f[1]);
-      // })
       this.rule2();
     }
 
     runRule3 () {
-      // const vm = this
-      // // var cellWhole = vm.cells.reduceArray()
-      // // var numCount = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-      // // numCount = numCount.map(n => cellWhole.countOf(n))
-      // var fills = vm.rule3()
-      // fills.forEach(f => {
-      //   vm.cells[f[0][0]].splice(f[0][1], 1, f[1])
-      // })
       this.rule3();
     }
 
     runRule4 () {
-      // const vm = this
-      // // var cellWhole = vm.cells.reduceArray()
-      // // var numCount = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-      // // numCount = numCount.map(n => cellWhole.countOf(n))
-      // var fills = vm.rule4()
-      // fills.forEach(f => {
-      //   vm.cells[f[0][0]].splice(f[0][1], 1, f[1])
-      // })
       this.rule4();
     }
 
     convert (arr: Array<Cell>) {
-      // return arr.map(i => this.cells[i[0]][i[1]] == "" ? 0 : this.cells[i[0]][i[1]])
       return arr.map(c => c.value == "" ? 0 : c.value);
-    }
-
-    runRuleForGroup  (rule, group) {
-      const vm = this;
-      let fills = group.map(rule).reduceArray();
-      // fills example:
-      // [[[0,0], 5],
-      //  [[2,1], 3],
-      //  [[5,6], 8]]
-      fills.forEach(f => {
-        // 由于JavaScript的限制，Vue不能检测这种利用索引直接设置一个项的改动，可以用Vue.set
-        // 或者splice方法。然而这里识别不出Vue而且我们用的是二维数组，所以只好用splice了。
-        vm.cells[f[0][0]].splice(f[0][1], 1, f[1])
-        // Vue.set(vm.cells[f[0][0]], f[0][1], f[1])
-        // vm.cells[f[0][0]][f[0][1]] = f[1]
-      })
-      // group = group.map(rule)
     }
 
     // fill the last value if the group is missing only one element
     rule1 (arr: Array<Cell>) {
       let arrVal: Array<number>= this.convert(arr);
-      // var fills: Array<any> = []
       if (arrVal.countOf(0) == 1) {
         let sum = 0;
         arrVal.forEach(e => sum = sum + e);
         let idx = arrVal.indexOf(0);
         arr[idx].value = 45 - sum;
-        // fills.push([arr[idx], 45 - sum]);
       }
-      // if (arr.countOf(0) == 1) {
-      //   let sum = 0
-      //   arr.forEach(e => sum = sum + e)
-      //   arr[arr.indexOf(0)] = 45 - sum
-      // }
-      // return fills;
     }
 
     // scan three hoziontal lines at a time, since each horizontal line should have a number exactly
     // once, cross vertical lines to see if there is some definite element that can be filled
     rule2 () {
       const vm = this;
-      // var fills: Array<any> = []
       for (let i = 0; i < 9; i += 3) {
         // combine all numbers of the three heng lines
         let heng3 = vm.heng[i].concat(vm.heng[i+1]).concat(vm.heng[i+2]);
@@ -218,21 +149,18 @@
             let countShu3 = vm.convert(vm.shu[startShu + 2]).countOf(k) | Number((vm.cells[targetHeng][startShu + 2].value != ""))
             // if both of the other two lines contains k or the position is occupied, then the left target cell can only be k
             if (countShu1 + countShu2 + countShu3 == 2) {
-              let targetShu = countShu1 == 0 ? startShu : countShu2 == 0 ? startShu + 1 : startShu + 2
-              // fills.push([[targetHeng, targetShu], k])
+              let targetShu = countShu1 == 0 ? startShu : countShu2 == 0 ? startShu + 1 : startShu + 2;
               vm.cells[targetHeng][targetShu].value = k;
             }
           }
         }
       }
-      // return fills
     }
 
     // scan three vertical lines at a time, since each vertical line should have a number exactly
     // once, cross horizontal lines to see if there is some definite element that can be filled
     rule3 () {
       const vm = this;
-      // var fills: Array<any> = []
       for (let i = 0; i < 9; i += 3) {
         var shu3 = vm.shu[i].concat(vm.shu[i+1]).concat(vm.shu[i+2])
         var shu3Val: Array<number> = vm.convert(shu3);
@@ -256,21 +184,18 @@
             let countHeng3 = vm.convert(vm.heng[startHeng + 2]).countOf(k) | Number((vm.cells[startHeng + 2][targetShu].value != ""))
             // if both of the other two lines contains k or the position is occupied, then the left target cell can only be k
             if (countHeng1 + countHeng2 + countHeng3 == 2) {
-              var targetHeng = countHeng1 == 0 ? startHeng : countHeng2 == 0 ? startHeng + 1 : startHeng + 2
-              // fills.push([[targetHeng, targetShu], k])
+              var targetHeng = countHeng1 == 0 ? startHeng : countHeng2 == 0 ? startHeng + 1 : startHeng + 2;
               vm.cells[targetHeng][targetShu].value = k;
             }
           }
         }
       }
-      // return fills
     }
 
     // scan each cell, list all number occurrence for its corresponding heng, shu and jiu groups, if
     // there is only one number left, fill that number
     rule4 () {
       const vm = this;
-      // var fills: Array<any> = []
       for (let i = 0; i < 9; i ++) {
         for (let j = 0; j < 9; j ++) {
           if (vm.cells[i][j].value == "") {
@@ -282,13 +207,11 @@
             nums.forEach(n => nonFillable[n] = 1)
             let fillable = [1,2,3,4,5,6,7,8,9].filter(n => !nonFillable[n])
             if (fillable.length == 1) {
-              // fills.push([[i, j], fillable[0]])
               vm.cells[i][j].value = fillable[0];
             }
           }
         }
       }
-      // return fills
     }
 
     // declare lifecycle hook

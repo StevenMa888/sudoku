@@ -4,7 +4,8 @@
       <table class="sudoku" border="1" cellspacing="0">
         <tr v-for="x in 9">
           <td v-for="y in 9">
-            <input type="number" min="1" max= "9" v-model.number="cells[x-1][y-1].value"/>
+            <input v-if="cells[x-1][y-1].value!='' || cells[x-1][y-1].possibleValues.length==0" type="number" min="1" max= "9" v-model.number="cells[x-1][y-1].value"/>
+            <textarea class= "hint" v-if="cells[x-1][y-1].value=='' && cells[x-1][y-1].possibleValues.length>0" v-model="cells[x-1][y-1].possibleValues.join('')"/>
           </td>
         </tr>
       </table>
@@ -206,6 +207,7 @@
             let nonFillable = {};
             nums.forEach(n => nonFillable[n] = 1);
             let fillable = [1,2,3,4,5,6,7,8,9].filter(n => !nonFillable[n]);
+            vm.cells[i][j].possibleValues = fillable;
             if (fillable.length == 1) {
               vm.cells[i][j].value = fillable[0];
             }
@@ -256,11 +258,9 @@
     margin-left: -200px;
   }
   .sudoku tr, .sudoku td {
-    width: 40px;
-    height: 40px;
     padding: 0;
   }
-  .sudoku input{
+  .sudoku input, .sudoku textarea{
     width: 40px;
     height: 40px;
     padding: 0;
@@ -274,5 +274,11 @@
   button.run {
     margin-top: 20px;
     font-size: 20px;
+  }
+  .hint {
+    color: orange;
+    font-size: 15px !important;
+    resize: none;
+    display: block;
   }
 </style>

@@ -204,7 +204,12 @@
       const vm = this;
       for (let i = 0; i < 9; i ++) {
         for (let j = 0; j < 9; j ++) {
-          if (vm.cells[i][j].value == "") {
+          let targetCell = vm.cells[i][j];
+          if (targetCell.value == "") {
+            if (targetCell.possibleValues.length == 1) {
+              targetCell.value = targetCell.possibleValues[0];
+              continue;
+            }
             let g1 = i; // heng group that the current cell belongs to
             let g2 = j; // shu group...
             let g3 = 3 * Math.floor(g1 / 3) + Math.floor(g2 / 3); // jiu group...
@@ -212,9 +217,9 @@
             let nonFillable = {};
             nums.forEach(n => nonFillable[n] = 1);
             let fillable = [1,2,3,4,5,6,7,8,9].filter(n => !nonFillable[n]);
-            vm.cells[i][j].possibleValues = fillable;
+            targetCell.possibleValues = fillable;
             if (fillable.length == 1) {
-              vm.cells[i][j].value = fillable[0];
+              targetCell.value = fillable[0];
             }
           }
         }

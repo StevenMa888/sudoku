@@ -18,7 +18,7 @@
     // 如何处理模块
     "moduleResolution": "node",
     // 编译输出目标 ES 版本
-    "target": "es5",
+    "target": "es6",
     // 允许从没有设置默认导出的模块中默认导入
     "allowSyntheticDefaultImports": true,
     // 将每个文件作为单独的模块

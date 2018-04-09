@@ -13,6 +13,7 @@
       <button class="btn btn-primary run" @click="runRule2">Run Rule 2</button>
       <button class="btn btn-primary run" @click="runRule3">Run Rule 3</button>
       <button class="btn btn-primary run" @click="runRule4">Run Rule 4</button>
+      <button class="btn btn-primary run" @click="runRule5">Run Rule 5</button>
   </div>
 </template>
 
@@ -104,6 +105,10 @@
 
     runRule4 () {
       this.rule4();
+    }
+
+    runRule5 () {
+      this.rule5();
     }
 
     convert (arr: Array<Cell>) {
@@ -216,6 +221,67 @@
       }
     }
 
+    // if in a group, only n possible values are for n blocks, then these n possible values
+    // should be excluded in other blocks within the
+    rule5 () {
+      const vm = this;
+      let allGroups = vm.heng.concat(vm.shu).concat(vm.jiu);
+      let sortArray = function(a, b) {
+        if (a.possibleValues.length > b.possibleValues.length) return 1;
+        if (a.possibleValues.length < b.possibleValues.length) return -1;
+        return a.possibleValues > b.possibleValues ? 1 : 0;
+      }
+      allGroups.forEach(g => {
+        // only consider those non-fill blocks
+        g = g.filter(c => c.possibleValues.length > 0);
+        // sort array to make blocks with same possibleValues adjacent
+        g.sort(sortArray);
+        // find blocks with same possibleValues and store them based on length
+        // e.x. {2: [[cell1, cell2]], 3: [[cell3, cell4], [cell4, cell5]]}
+        let samePossibleValues: Object = {};
+        for (let i = 0; i < g.length - 1; i++) {
+          if (g[i].possibleValues.equals(g[i+1].possibleValues)) {
+            let key = g[i].possibleValues.length;
+            samePossibleValues[key] = samePossibleValues[key] ? samePossibleValues[key] : [];
+            samePossibleValues[key].push([g[i], g[i+1]]);
+          }
+        }
+        // merge pairs of same possibleValues based on length
+        // e.x. {2: [[cell1, cell2]], 3: [[cell3, cell4, cell5]]}
+        let lengths = Object.keys(samePossibleValues);
+        let mergedSamePossibleValues: Object = {};
+        for (let i = Math.min.apply(Math, lengths); i <= Math.max.apply(Math, lengths); i++) {
+          let p = samePossibleValues[i];
+          // length 2 doesn't need to merge pairs
+          if (i == 2) {
+            mergedSamePossibleValues[i] = p;
+            continue;
+          }
+          // merge pairs based on length
+          // e.x. {3: [[cell3, cell4, cell5], [cell7, cell8, cell9]], 4: [[cell1, cell2, cell6, cell7]]}
+          for (let j = 0; j <= p.length - i + 1; j++) {
+            let s = i - 2;
+            while (s > 0) {
+              p[j] = p[j].concat(p[j+1]);
+              p.splice(j+1, 1);
+              s--;
+            }
+            mergedSamePossibleValues[i] = mergedSamePossibleValues[i] ? mergedSamePossibleValues[i] : [];
+            mergedSamePossibleValues[i].push([...new Set(p[j])]);
+          }
+        }
+        let mergedLengths = Object.keys(mergedSamePossibleValues);
+        mergedLengths.forEach(l => {
+          mergedSamePossibleValues[l].forEach(m => {
+            if (m.length == l) {
+              let otherBlocks = g.filter(c => !m.includes(c));
+              otherBlocks.forEach(c => c.possibleValues = c.possibleValues.filter(v => !m[0].possibleValues.includes(v)));
+            }
+          })
+        })
+      })
+    }
+
     // declare lifecycle hook
     mounted () {
       Array.prototype.countOf = function(value: number) {
@@ -236,6 +302,26 @@
           }
         }
         return [max, index];
+      }
+      Array.prototype.equals =  function (array) {
+        // if the other array is a falsy value, return
+        if (!array) return false;
+ 
+        // compare lengths - can save a lot of time
+        if (this.length != array.length) return false;
+        
+        for (var i = 0, l = this.length; i < l; i++) {
+          // Check if we have nested arrays
+          if (this[i] instanceof Array && array[i] instanceof Array) {
+            // recurse into the nested arrays
+            if (!this[i].equals(array[i])) return false;
+          }
+          else if (this[i] != array[i]) {
+            // Warning - two different object instances will never be equal: {x:20} != {x:20}
+            return false;
+          }
+        }
+        return true;
       }
       this.compute();
     }

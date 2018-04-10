@@ -14,6 +14,7 @@
       <button class="btn btn-primary run" @click="runRule3">Run Rule 3</button>
       <button class="btn btn-primary run" @click="runRule4">Run Rule 4</button>
       <button class="btn btn-primary run" @click="runRule5">Run Rule 5</button>
+      <button class="btn btn-primary run" @click="runRule6">Run Rule 6</button>
   </div>
 </template>
 
@@ -109,6 +110,10 @@
 
     runRule5 () {
       this.rule5();
+    }
+
+    runRule6 () {
+      this.rule6();
     }
 
     convert (arr: Array<Cell>) {
@@ -284,6 +289,42 @@
             }
           })
         })
+      })
+    }
+
+    // for cases like [[1,2], [2,5], [1,5]], other blocks can also exclude [1,2,5]
+    rule6 () {
+      const vm = this;
+      let allGroups = vm.heng.concat(vm.shu).concat(vm.jiu);
+      let sortArray = function(a, b) {
+        if (a.possibleValues.length > b.possibleValues.length) return 1;
+        if (a.possibleValues.length < b.possibleValues.length) return -1;
+        return a.possibleValues > b.possibleValues ? 1 : 0;
+      }
+      allGroups.forEach(g => {
+        // only consider those non-fill blocks
+        g = g.filter(c => c.possibleValues.length > 0);
+        // sort array to make blocks with same length of possible values adjacent
+        g.sort(sortArray);
+        for (let n = g[0].possibleValues.length; n <= g[g.length - 1].possibleValues.length; n++) {
+          for (let i = 0; i < g.length - n + 1 && g[i].possibleValues.length <=n ; i++) {
+            let s = n - 1;
+            let j = 1;
+            let mergedCells: Array<Cell> = [g[i]];
+            let mergedPossibleValues: Array<number> = g[i].possibleValues;
+            while (s > 0) {
+              mergedCells.push(g[i+j]);
+              mergedPossibleValues = mergedPossibleValues.concat(g[i+j].possibleValues);
+              j++;
+              s--;
+            }
+            mergedPossibleValues = [...new Set(mergedPossibleValues)];
+            if (n == mergedPossibleValues.length) {
+              let otherBlocks = g.filter(c => !mergedCells.includes(c));
+              otherBlocks.forEach(c => c.possibleValues = c.possibleValues.filter(v => !mergedPossibleValues.includes(v)));
+            }
+          }
+        }
       })
     }
 

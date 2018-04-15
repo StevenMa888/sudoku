@@ -1,6 +1,6 @@
 <template>
   <div id="app" class="container">
-      <h2 class="text-center">Sudoku</h2>
+      <h2>Sudoku</h2>
       <table class="sudoku" border="1" cellspacing="0">
         <tr v-for="x in 9">
           <td v-for="y in 9">
@@ -15,15 +15,16 @@
       <button class="btn btn-primary run" @click="runRule4">Run Rule 4</button>
       <button class="btn btn-primary run" @click="runRule5">Run Rule 5</button>
       <button class="btn btn-primary run" @click="runRule6">Run Rule 6</button>
+      <h2 v-if="solved" class="words-congrats">Congratulations! You solved the Sudoku!</h2>
   </div>
 </template>
 
 <script lang="ts">
   import Vue from 'vue'
-  import Component from 'vue-class-component'
+  import {Component, Watch} from 'vue-property-decorator'
 
   class Cell {
-    constructor(public x: number, public y: number, public value: any = 0, public possibleValues: Array<number> = []) {
+    constructor (public x: number, public y: number, public value: any = 0, public possibleValues: Array<number> = []) {
       this.x = x;
       this.y = y;
       this.value = value;
@@ -33,9 +34,13 @@
 
   class Sudoku {
     cells: Object = {};
+    heng: Array<Array<Cell>>  = [];
+    shu: Array<Array<Cell>>  = [];
+    jiu: Array<Array<Cell>>  = [];
 
-    constructor(rawCells: Array<Array<any>>) {
+    constructor (rawCells: Array<Array<any>>) {
       this.cells = this.convert2DArrayToObject(rawCells);
+      this.group();
     }
 
     convert2DArrayToObject (arr2: Array<Array<any>>) : Object {
@@ -48,9 +53,47 @@
       })
       return object;
     }
+
+    group () {
+      const vm = this;
+      for (let i = 0; i < 9; i++) {
+        vm.heng[i] = [];
+        vm.shu[i] = [];
+        vm.jiu[i] = [];
+        for (let j = 0; j < 9; j++) {
+          vm.heng[i][j] = vm.cells[i][j];
+          vm.shu[i][j] = vm.cells[j][i];
+          vm.jiu[i][j] = vm.cells[3 * Math.floor(i/3) + Math.floor(j/3)][3 * (i%3) + j%3];
+        }
+      }
+    }
+
+    isSolved () {
+      const vm = this;
+      if (vm.heng.every((g, i) => vm.isGroupCompleted(g))
+        && vm.shu.every((g, i) => vm.isGroupCompleted(g))
+        && vm.jiu.every((g, i) => vm.isGroupCompleted(g))) {
+          return true;
+      } else {
+        return false;
+      }
+    }
+
+    isGroupCompleted (arr: Array<Cell>) {
+      let numbers: Map<number, boolean> = new Map();
+      arr.forEach(c => numbers.set(c.value, true));
+
+      let flag = true;
+      return [1,2,3,4,5,6,7,8,9].every((n, i) => {
+        if (!numbers.get(n)) {
+          return false;
+        }
+        return true;
+      })
+    }
   }
 
-  @Component({})
+  @Component
   export default class App extends Vue {
     // initilize data
     rawCells: Array<Array<any>> = [
@@ -67,29 +110,16 @@
     sudoku: Sudoku = new Sudoku(this.rawCells);
     cells: Object = this.sudoku.cells;
 
-    heng: Array<Array<Cell>>  = [];
-    shu: Array<Array<Cell>>  = [];
-    jiu: Array<Array<Cell>>  = [];
+    heng: Array<Array<Cell>>  = this.sudoku.heng;
+    shu: Array<Array<Cell>>  = this.sudoku.shu;
+    jiu: Array<Array<Cell>>  = this.sudoku.jiu;
     
-    // methods
-    compute () {
-      const vm = this;
-      let group = function () {
-        for (let i = 0; i < 9; i++) {
-          vm.heng[i] = [];
-          vm.shu[i] = [];
-          vm.jiu[i] = [];
-          for (let j = 0; j < 9; j++) {
-            vm.heng[i][j] = vm.cells[i][j];
-            vm.shu[i][j] = vm.cells[j][i];
-            vm.jiu[i][j] = vm.cells[3 * Math.floor(i/3) + Math.floor(j/3)][3 * (i%3) + j%3];
-          }
-        }
-      };
-
-      group();
+    // computerd
+    get solved () {
+      return this.sudoku.isSolved();
     }
 
+    // methods
     runRule1 () {
       const vm = this;
       let groups = [vm.heng, vm.shu, vm.jiu];
@@ -369,7 +399,11 @@
         }
         return true;
       }
-      this.compute();
+    }
+
+    @Watch('sudoku.isSolved', {immediate: true, deep: true})
+    onCompletedChanged (newVal, oldVal) {
+
     }
   }
 </script>
@@ -412,5 +446,8 @@
     font-size: 15px !important;
     resize: none;
     display: block;
+  }
+  .words-congrats {
+    color: red;
   }
 </style>

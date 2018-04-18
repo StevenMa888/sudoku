@@ -19,6 +19,8 @@
     "moduleResolution": "node",
     // 编译输出目标 ES 版本
     "target": "es2017",
+    // 添加对jsx的支持
+    "jsx": "preserve",
     // 允许从没有设置默认导出的模块中默认导入
     "allowSyntheticDefaultImports": true,
     // 将每个文件作为单独的模块
@@ -51,7 +53,10 @@
     // 编译过程中需要引入的库文件的列表
     "lib": [
       "dom",
-      "es7"
+      "es5",
+      "es6",
+      "es7",
+      "es2015.promise"
     ],
     "pretty": true
   }

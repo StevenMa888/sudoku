@@ -12,9 +12,6 @@
       <button class="btn btn-primary run" @click="runRule1">Run Rule 1</button>
       <button class="btn btn-primary run" @click="runRule2">Run Rule 2</button>
       <button class="btn btn-primary run" @click="runRule3">Run Rule 3</button>
-      <button class="btn btn-primary run" @click="runRule4">Run Rule 4</button>
-      <button class="btn btn-primary run" @click="runRule5">Run Rule 5</button>
-      <button class="btn btn-primary run" @click="runRule6">Run Rule 6</button>
       <h2 v-if="solved" class="words-congrats">Congratulations! You solved the Sudoku!</h2>
   </div>
 </template>
@@ -121,28 +118,15 @@
 
     // methods
     runRule1 () {
-      const vm = this;
-      let groups = [vm.heng, vm.shu, vm.jiu];
-      groups.forEach(g => g.map(vm.rule1));
-    }
-
-    runRule2 () {
       this.rule2();
-    }
-
-    runRule3 () {
       this.rule3();
     }
 
-    runRule4 () {
+    runRule2 () {
       this.rule4();
     }
 
-    runRule5 () {
-      this.rule5();
-    }
-
-    runRule6 () {
+    runRule3 () {
       this.rule6();
     }
 
@@ -151,14 +135,18 @@
     }
 
     // fill the last value if the group is missing only one element
-    rule1 (arr: Array<Cell>) {
-      let arrVal: Array<number>= this.convert(arr);
-      if (arrVal.countOf(0) == 1) {
-        let sum = 0;
-        arrVal.forEach(e => sum = sum + e);
-        let idx = arrVal.indexOf(0);
-        arr[idx].value = 45 - sum;
-      }
+    rule1 () {
+      const vm = this;
+      let allGroups = vm.heng.concat(vm.shu).concat(vm.jiu);
+      allGroups.forEach(g => {
+        let arrVal: Array<number>= vm.convert(g);
+        if (arrVal.countOf(0) == 1) {
+          let sum = 0;
+          arrVal.forEach(e => sum = sum + e);
+          let idx = arrVal.indexOf(0);
+          g[idx].value = 45 - sum;
+        }
+      });
     }
 
     // scan three hoziontal lines at a time, since each horizontal line should have a number exactly
